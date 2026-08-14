@@ -1,0 +1,14 @@
+{
+  "name": "Mogador Guide",
+  "short_name": "Mogador",
+  "description": "Essaouira medina spots, contacts and transport — kept by a local.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F6F3EC",
+  "theme_color": "#1B4965",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
