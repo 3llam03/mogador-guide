@@ -7,6 +7,8 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1B4965">
 <link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
@@ -369,6 +371,42 @@
     margin-left:8px;
   }
 
+  /* Map */
+  #busMap{
+    width:100%;
+    height:220px;
+    border-radius:16px;
+    border:1px solid #EDE6D6;
+    margin-bottom:10px;
+  }
+  .directions-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    background:var(--ocean-deep);
+    color:#fff;
+    text-decoration:none;
+    font-weight:600;
+    font-size:13px;
+    padding:12px;
+    border-radius:14px;
+    margin-bottom:16px;
+  }
+  .leaflet-popup-content{ font-family:'Inter',sans-serif; font-size:12.5px; }
+  .map-pin-num{
+    background:var(--ocean-deep);
+    color:#fff;
+    width:22px;height:22px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    font-weight:600;
+    border:2px solid #fff;
+    box-shadow:0 2px 5px rgba(0,0,0,0.25);
+  }
+
   /* bottom mini footer */
   .footer-note{
     text-align:center;
@@ -497,7 +535,13 @@
       <div class="section-label">Getting around</div>
       <div class="section-title">Buses & taxis</div>
 
-      <div class="section-label" style="margin-top:4px;">Lima Bus — local lines</div>
+      <div id="busMap"></div>
+      <a class="directions-btn" href="https://www.google.com/maps/dir/?api=1&destination=31.5164406,-9.7655018" target="_blank">
+        <span>📍 Directions to Lima Bus (village lines)</span>
+      </a>
+
+      <div class="section-label" style="margin-top:4px;">Lima Bus — village & neighborhood lines</div>
+      <div style="font-size:12.5px; color:var(--ink-soft); margin-bottom:12px; line-height:1.5;">All 9 lines below depart from the Lima Bus station shown on the map above.</div>
 
       <div class="line-card" onclick="this.classList.toggle('open')">
         <div class="line-head">
@@ -619,26 +663,26 @@
         </div>
       </div>
 
-      <div class="section-label" style="margin-top:18px;">Marrakech route</div>
-      <div class="transport-card">
-        <h4>CTM — Marrakech line</h4>
-        <table>
-          <tr><td class="route">Essaouira → Marrakech</td><td class="time">07:30</td></tr>
-          <tr><td class="route">Essaouira → Marrakech</td><td class="time">11:00</td></tr>
-          <tr><td class="route">Essaouira → Marrakech</td><td class="time">16:30</td></tr>
-          <tr><td class="route">Marrakech → Essaouira</td><td class="time">09:00</td></tr>
-          <tr><td class="route">Marrakech → Essaouira</td><td class="time">18:00</td></tr>
-        </table>
+      <div class="section-label" style="margin-top:18px;">Intercity buses</div>
+      <div class="line-card">
+        <div class="line-head" style="cursor:default;">
+          <div class="line-head-left"><div class="line-title">Marrakech, Agadir & other cities<span class="pending-badge">pending</span></div></div>
+        </div>
+        <div class="line-body" style="display:block; padding-top:0;">
+          <div class="line-note" style="color:var(--ink-soft); font-weight:400;">Schedules not yet collected — different station from Lima Bus, about 1km away. Tap below to find it.</div>
+        </div>
       </div>
+      <a class="directions-btn" href="https://www.google.com/maps/dir/?api=1&destination=31.5172856,-9.7590446" target="_blank" style="background:var(--terracotta);">
+        <span>📍 Directions to intercity station</span>
+      </a>
 
       <div class="transport-card">
-        <h4>Grand taxi — fair rates</h4>
+        <h4>Petit taxi — city rates</h4>
         <table>
-          <tr><td class="route">Within medina zone</td><td class="time">10–15 MAD</td></tr>
-          <tr><td class="route">To the beach / port</td><td class="time">15–20 MAD</td></tr>
-          <tr><td class="route">To Sidi Kaouki (shared)</td><td class="time">~25 MAD</td></tr>
+          <tr><td class="route">Daytime (before 20:00)</td><td class="time">7 DH</td></tr>
+          <tr><td class="route">Night (20:00 onward)</td><td class="time">8 DH</td></tr>
         </table>
-        <div class="taxi-note"><b>Tip:</b> agree on the price before getting in — shared grand taxis are metered by seat, not by ride.</div>
+        <div class="taxi-note"><b>Tip:</b> this is the standard metered/flat local rate within the city — confirm with the driver before riding if unsure.</div>
       </div>
     </div>
 
@@ -655,6 +699,57 @@
       tab.classList.add('active');
       document.getElementById(tab.dataset.tab).classList.add('active');
     });
+  });
+
+  // ---- Bus map ----
+  // Coordinates from public map data. Hrarta's exact stop is unverified — approximate for now.
+  const busStops = [
+    { num: '🚏', name: 'Lima Bus station (village lines)', lat: 31.5164406, lng: -9.7655018, hub: 'lima' },
+    { num: '🚌', name: 'Intercity station (Marrakech, Agadir...)', lat: 31.5172856, lng: -9.7590446, hub: 'intercity' },
+    { num: '1', name: 'Aguerd', lat: 31.2922, lng: -9.3354 },
+    { num: '2', name: 'Sidi Kaouki', lat: 31.3514, lng: -9.7972 },
+    { num: '3', name: 'Smimou', lat: 31.2122, lng: -9.7093 },
+    { num: '4', name: 'Hrarta (approx.)', lat: 31.4834, lng: -9.6253 },
+    { num: '5', name: 'Talmest', lat: 31.8146, lng: -9.3418 },
+    { num: '6', name: 'Hanchane', lat: 31.5215, lng: -9.4367 },
+    { num: '7', name: 'Sidi Ishak', lat: 31.8570, lng: -9.4450 },
+    { num: '8', name: 'Akermoud', lat: 31.7701, lng: -9.5601 },
+    { num: '9', name: 'Taftacht', lat: 31.5815, lng: -9.2550 },
+  ];
+
+  let busMap;
+  function initBusMap() {
+    if (busMap || !document.getElementById('busMap')) return;
+    // Center between the two stations so both are visible on load.
+    busMap = L.map('busMap', { zoomControl: true, attributionControl: true })
+      .setView([31.5168, -9.7623], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap'
+    }).addTo(busMap);
+
+    busStops.forEach(stop => {
+      let bg = 'var(--ocean-deep)', size = 22, fontSize = 11;
+      if (stop.hub === 'lima') { bg = 'var(--terracotta)'; size = 30; fontSize = 14; }
+      if (stop.hub === 'intercity') { bg = '#8A6D3B'; size = 30; fontSize = 14; }
+      const icon = L.divIcon({
+        className: '',
+        html: `<div class="map-pin-num" style="background:${bg};width:${size}px;height:${size}px;font-size:${fontSize}px;">${stop.num}</div>`,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+      });
+      const marker = L.marker([stop.lat, stop.lng], { icon }).addTo(busMap)
+        .bindPopup(stop.hub ? `<b>${stop.name}</b>` : `Line ${stop.num} → ${stop.name}`);
+      if (stop.hub === 'lima') marker.openPopup();
+    });
+  }
+
+  // Init when the Transport tab is first opened (map needs visible container to size correctly)
+  document.querySelector('[data-tab="transport"]').addEventListener('click', () => {
+    setTimeout(() => {
+      initBusMap();
+      if (busMap) busMap.invalidateSize();
+    }, 50);
   });
 </script>
 
